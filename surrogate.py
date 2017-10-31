@@ -87,3 +87,26 @@ class StoGrad:
         subsety = self.y[select]
         return(np.dot(np.transpose(subsetX), subsety - np.exp(np.dot(subsetX, beta)) \
             / (1.0 + np.exp(np.dot(subsetX, beta)))) - beta / self.alpha)
+    
+class GaussianProcess:
+    """
+    Gaussian process surrogate.
+    """
+
+    def __init__(self, kernel, training, energy, length):
+        self.kernel = kernel # sklearn GP kernel
+        self.training = training # data X
+        self.energy = energy # data Y
+        self.energy_normalized = (energy - np.mean(energy)) / np.std(energy)
+        self.length = length # GP parameter for calculating derivative
+        self.K_inverse = np.linalg.inv(kernel(training)) # inverse kernel matrix
+
+    def gradient(self, x):
+        n = self.K_inverse.shape[0]
+        k = self.training.shape[1]
+        # calculate gradient first component with chain rule
+        C = self.kernel(x, self.training) 
+        dk = np.zeros((k, n))
+        for i in range(k):
+            dk[i, :] = - C * (self.training[:, i] - x[i]) / self.length ** 2
+        return(np.dot(np.dot(dk, self.K_inverse), self.energy_normalized) * np.mean(self.energy))
