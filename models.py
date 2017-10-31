@@ -88,3 +88,35 @@ class Riemannian:
 
     def gradient(self, x):
         return(-(x - self.mu))
+    
+class Laplace:
+    """
+    Logistic regression model wtih Laplace prior.
+    """
+
+    def __init__(self, data_X, data_y):
+        self.X = data_X
+        self.y = data_y
+
+    def __loglikelihood(self, beta):
+        """
+        Log logistic regression likelihood of beta.
+        """
+        return(-np.sum(np.log(np.exp(np.dot(self.X, beta)) + 1.0)) \
+            + np.dot(np.transpose(self.y), np.dot(self.X, beta)))
+
+    def __prior(self, beta):
+        """
+        Log independent Laplace prior density of beta.
+        """
+        return(-np.sum(np.absolute(beta)))
+
+    def get_dim(self):
+        return(self.X.shape[1])
+
+    def energy(self, beta):
+        return(-(self.__loglikelihood(beta) + self.__prior(beta)))
+
+    def gradient(self, beta):
+        return(np.dot(np.transpose(self.X), self.y - np.exp(np.dot(self.X, beta)) \
+            / (1.0 + np.exp(np.dot(self.X, beta)))) - np.sign(beta))
