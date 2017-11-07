@@ -4,7 +4,7 @@ Hamiltonian monte carlo (HMC) is an effective way to sample from posterior disti
 
 ## Sampler
 
-Main HMC sampler
+HMC sampler
 
 ## Surrogate
 
